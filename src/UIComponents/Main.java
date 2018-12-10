@@ -5,6 +5,9 @@
  */
 package UIComponents;
 
+import APIComponents.APIinterface;
+import APIComponents.WikipediaService;
+import DBComponents.DBController;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -14,16 +17,24 @@ import javafx.stage.Stage;
  */
 public class Main extends Application {
     Stage window;
-    Scene scene1, scene2;   
-    ViewFactory viewFactory;
- 
+    SearchScene scene1;
+    SearchScene scene2;   
+    SearchViewFactory viewFactory;
+    SavedDataViewFactory viewFactory2;
+    final APIinterface wikiAPI = new WikipediaService();
+    final DBController dbController = new DBController();
+
     @Override
     public void start(Stage primaryStage) {
         this.window = primaryStage;
-        this.viewFactory = new ViewFactory(window);
+        this.viewFactory = new SearchViewFactory(window, wikiAPI, dbController);
+        this.viewFactory2 = new SavedDataViewFactory(window, dbController);
         
         scene1 = viewFactory.buildScene1();
-        scene2 = viewFactory.buildScene2();
+        scene2 = viewFactory2.buildScene2();
+        
+        scene1.setNextScene(scene2);
+        scene2.setNextScene(scene1);
         
         primaryStage.setTitle("");
         primaryStage.setScene(scene1);

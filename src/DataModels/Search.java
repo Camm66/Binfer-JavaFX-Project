@@ -15,12 +15,14 @@ public class Search {
     private Long id;
     private String term;
     private String response;
+    private String source;
     private CheckBox checkbox;
     
-    public Search(Long id, String term, String response){
+    public Search(Long id, String term, String response, String source){
         this.id = id;
         this.term = term;
         this.response = response;
+        this.source = source;
         this.checkbox = new CheckBox();
     }
     
@@ -42,5 +44,9 @@ public class Search {
     
     public void setCheckbox(CheckBox checkbox){
         this.checkbox = checkbox;
+    }
+
+    public String getSource() {
+        return this.source;
     }
 }

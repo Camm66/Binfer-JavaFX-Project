@@ -28,7 +28,7 @@ public final class DBController implements DBinterface{
     private String dbUrl = "jdbc:derby://localhost:1527/SearchResults";
     
     private static String INSERT_SQL = "INSERT INTO "
-             + "cammorales93.searches(id, term, response) values(?, ?, ?) ";
+             + "cammorales93.searches(id, term, response, source) values(?, ?, ?, ?) ";
      
     private static final String DELETE_SQL = "DELETE FROM cammorales93.searches"
                                               + " WHERE id = ?";
@@ -40,20 +40,23 @@ public final class DBController implements DBinterface{
     
     public DBController(){}
     
+    @Override
     public void writeToDatabase(Search search){
         try {
             Connection conn = getConnection();
-            PreparedStatement ps = conn.prepareStatement(this.INSERT_SQL,
+            PreparedStatement ps = conn.prepareStatement(INSERT_SQL,
                     Statement.RETURN_GENERATED_KEYS);
             ps.setLong(1, getLastID(conn));
             ps.setString(2, search.getTerm());
             ps.setString(3, search.getResponse());
+            ps.setString(4, search.getSource());
             ps.executeUpdate();
         } catch (SQLException ex) {
             Logger.getLogger(DBController.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
+    @Override
     public void deleteFromDatabase(Search search) {
         try {
             Connection conn = getConnection();
@@ -66,6 +69,7 @@ public final class DBController implements DBinterface{
         }
     }
 
+    @Override
     public ObservableList<Search> getAllSearches() {
         ObservableList<Search> result = FXCollections.observableArrayList();
         Statement stmt = null;
@@ -78,7 +82,8 @@ public final class DBController implements DBinterface{
                 Long id = rs.getLong("id");
                 String term = rs.getString("term");
                 String response = rs.getString("response");
-                result.add(new Search(id, term, response));
+                String source = rs.getString("source");
+                result.add(new Search(id, term, response, source));
             }    
         } catch (SQLException e ) {
             System.out.println(e);
@@ -94,7 +99,6 @@ public final class DBController implements DBinterface{
             ResultSet rs = stmt.executeQuery(GET_ID_SQL);   
             rs.next();
             id = rs.getLong(1);
-            System.out.println(id + 1);
         } catch (SQLException e) {
             System.out.println(e);
         }

@@ -44,12 +44,12 @@ public class WikipediaService implements APIinterface{
             JSONObject jsonObj2 = jsonObj.getJSONObject("query");
             JSONArray jsonArr = (JSONArray) jsonObj2.get("search");
             int searchIndex = 0;
-            int searchCount = 5;
+            int searchCount = 100;
             while(searchIndex < jsonArr.length() && searchCount > 0){
                 JSONObject jsonObj3 = (JSONObject) jsonArr.get(searchIndex);
                 title = (String) jsonObj3.get("title");
                 response = (String) jsonObj3.get("snippet");
-                responses.add(new Search(null, title, cleanSearchOutput(response)));
+                responses.add(new Search(null, title, cleanSearchOutput(response), "Wikipedia"));
                 searchIndex++;
                 searchCount--;
             }
