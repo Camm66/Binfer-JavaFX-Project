@@ -25,5 +25,4 @@ public class SearchScene extends Scene{
     public void setNextScene(Scene nextScene) {
         this.nextScene = nextScene;
     }
-    
 }

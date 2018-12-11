@@ -38,6 +38,10 @@ public class Search {
         return this.response;
     }
     
+    public String getSource() {
+        return this.source;
+    }
+    
     public CheckBox getCheckbox(){
         return this.checkbox;
     }
@@ -45,8 +49,9 @@ public class Search {
     public void setCheckbox(CheckBox checkbox){
         this.checkbox = checkbox;
     }
-
-    public String getSource() {
-        return this.source;
+    
+    @Override
+    public String toString(){
+        return this.getTerm();
     }
 }

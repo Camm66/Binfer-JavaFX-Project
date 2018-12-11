@@ -17,8 +17,7 @@ import javafx.stage.Stage;
  */
 public class Main extends Application {
     Stage window;
-    SearchScene scene1;
-    SearchScene scene2;   
+    SearchScene scene1, scene2;   
     SearchViewFactory viewFactory;
     SavedDataViewFactory viewFactory2;
     final APIinterface wikiAPI = new WikipediaService();
@@ -30,8 +29,8 @@ public class Main extends Application {
         this.viewFactory = new SearchViewFactory(window, wikiAPI, dbController);
         this.viewFactory2 = new SavedDataViewFactory(window, dbController);
         
-        scene1 = viewFactory.buildScene1();
-        scene2 = viewFactory2.buildScene2();
+        scene1 = viewFactory.buildScene();
+        scene2 = viewFactory2.buildScene();
         
         scene1.setNextScene(scene2);
         scene2.setNextScene(scene1);
