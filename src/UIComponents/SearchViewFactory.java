@@ -49,6 +49,7 @@ public class SearchViewFactory {
     private APIinterface apiService;
     private DBController dbController;
     private final SavedDataViewFactory viewFactory;
+    ListView<Search> listView;
 
     SearchViewFactory(Stage window, APIinterface apiService, DBController dbController) {
         this.window = window;
@@ -61,50 +62,34 @@ public class SearchViewFactory {
         BorderPane border = new BorderPane();
         SearchScene scene1 =  new SearchScene(border, 700, 450);
         
+        HBox hbox = buildMenu(scene1);
+        border.setTop(hbox);
+    
+        this.listView = new ListView<>();
+        border.setCenter(listView);
+        
+        HBox anchor = buildAnchor();
+        border.setBottom(anchor);
+        
+        return scene1;
+    }
+
+    private HBox buildMenu(SearchScene scene1) {
         HBox hbox = new HBox();
         hbox.setPadding(new Insets(15, 12, 15, 12));
         hbox.setSpacing(10);
-        hbox.setStyle("-fx-background-color: #e84118;");
-    //Create scene1 buttons
+        hbox.setStyle("-fx-background-color: #e95b4f;");
+        
+        //Create Search button
         Button searchBtn = new Button("Search");
         TextField searchTerm = new TextField();
-    //Add to the top of the border pane
         hbox.getChildren().addAll(searchTerm, searchBtn);
-        border.setTop(hbox);
-    //Add StackPane for the Search History Button
-        Button searchHistoryBtn = new Button("Search History");
-        StackPane stack = new StackPane();
-        stack.getChildren().add(searchHistoryBtn);
-        stack.setAlignment(Pos.BASELINE_RIGHT);
-        StackPane.setMargin(searchHistoryBtn, new Insets(0, 10, 0, 0));
-        hbox.getChildren().add(stack);
-        HBox.setHgrow(stack, Priority.ALWAYS);
-    //Create ListView to display results;
-        ListView<Search> listView = new ListView<>();
-        border.setCenter(listView);
         
         searchBtn.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 ArrayList<Search> results = (ArrayList<Search>) apiService.search(searchTerm.getText());
-                
                 listView.getItems().clear();
-               
-                Button saveBtn = new Button("Save Results");
-                HBox anchor = new HBox();
-                anchor.setPadding(new Insets(10, 7, 10, 7));
-                anchor.setStyle("-fx-background-color: #0F0603");
-                anchor.getChildren().add(saveBtn);
-                border.setBottom(anchor);
-                
-                saveBtn.setOnAction(new EventHandler<ActionEvent>() {
-                    @Override
-                    public void handle(ActionEvent e){
-                        saveItems(listView.getItems());
-                        saveBtn.setDisable(true);
-                    }
-                });
-                
                 for(int i = 0; i < results.size(); i ++){
                     Search result = results.get(i);
                     listView.getItems().add(result);
@@ -114,45 +99,84 @@ public class SearchViewFactory {
                     @Override
                     public ObservableValue<Boolean> call(Search item) {
                         BooleanProperty observable = new SimpleBooleanProperty();
-                        observable.addListener((obs, wasSelected, isNowSelected) -> 
+                        observable.addListener(e -> 
                         item.getCheckbox().setSelected(!(item.getCheckbox().isSelected())));
                         return observable;
                     }
                 }));
-                
-                listView.setOnMouseClicked(new EventHandler<MouseEvent>() {
-                    @Override
-                    public void handle(MouseEvent event) {
-                        Search search = listView.getSelectionModel().getSelectedItem();
-                        final Stage dialog = new Stage();
-                        dialog.initModality(Modality.APPLICATION_MODAL);
-                        dialog.initOwner(window);
-                        VBox dialogVbox = new VBox(20);
-                        dialogVbox.setPadding(new Insets(10, 10, 10, 10));
-                        dialogVbox.getChildren().add(new Text("Title: " + search.getTerm()));
-                        dialogVbox.getChildren().add(new Text("Response: " + search.getResponse()));
-                        dialogVbox.getChildren().add(new Text("Source: " + search.getSource()));
-                        Scene dialogScene = new Scene(dialogVbox, 300, 200);
-                        dialog.setScene(dialogScene);
-                        dialog.show();
-                    }
-                });      
+
+                listView.setOnMouseClicked(e -> buildListPopUp());     
             }
         });
-      
+        
+
+        Button searchHistoryBtn = new Button("Search History");
         searchHistoryBtn.setOnAction(e -> {
             SearchScene scene2 = this.viewFactory.buildScene();
             scene2.setNextScene(scene1);
             window.setScene(scene2);
         });
-        return scene1;
+        
+        StackPane stack = new StackPane();
+        stack.getChildren().add(searchHistoryBtn);
+        stack.setAlignment(Pos.BASELINE_RIGHT);
+        StackPane.setMargin(searchHistoryBtn, new Insets(0, 10, 0, 0));
+        
+        hbox.getChildren().add(stack);
+        HBox.setHgrow(stack, Priority.ALWAYS);
+        
+        return hbox;
+    }
+    
+    private void buildListPopUp(){
+        Search search = listView.getSelectionModel().getSelectedItem();
+        
+        final Stage dialog = new Stage();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.initOwner(window);
+        
+        VBox dialogVbox = new VBox(20);
+        dialogVbox.setPadding(new Insets(10, 10, 10, 10));
+        
+        Text title = new Text(search.getTerm());
+        dialogVbox.getChildren().add(title);
+        
+        Text response = new Text(search.getResponse());
+        response.setWrappingWidth(200);
+        dialogVbox.getChildren().add(response);
+        
+        Text source = new Text("Source: " + search.getSource());
+        dialogVbox.getChildren().add(source);
+        
+        Scene dialogScene = new Scene(dialogVbox, 300, 200);
+        dialog.setScene(dialogScene);
+        dialog.show();
+    }
+
+    private HBox buildAnchor() {
+        HBox anchor = new HBox();
+        anchor.setPadding(new Insets(10, 7, 10, 7));
+        anchor.setStyle("-fx-background-color: #0F0603");
+   
+        Button saveBtn = new Button("Save Results");
+        saveBtn.setOnAction(e -> {
+            saveItems(listView.getItems());
+        });
+        
+        anchor.getChildren().add(saveBtn);
+        return anchor;
     }
     
     private void saveItems(ObservableList<Search> items){
+        ArrayList<Search> savedSearches = new ArrayList<>();
         for(Search search: items){
             if(search.getCheckbox().isSelected()){
                 dbController.writeToDatabase(search);
+                savedSearches.add(search);
             }
+        }
+        for(Search search: savedSearches){
+            items.remove(search);
         }
     }
 

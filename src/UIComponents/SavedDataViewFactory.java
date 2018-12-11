@@ -13,7 +13,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -22,7 +21,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 /**
@@ -46,8 +44,7 @@ public class SavedDataViewFactory {
         
         HBox hbox = buildMenu(scene2);
         border.setTop(hbox);
-        
-        this.searches = dbController.getAllSearches();
+       
         this.searchTable = buildTable();
         border.setCenter(searchTable);
        
@@ -58,7 +55,7 @@ public class SavedDataViewFactory {
         HBox hbox = new HBox();
         hbox.setPadding(new Insets(15, 12, 15, 12));
         hbox.setSpacing(10);
-        hbox.setStyle("-fx-background-color: #273c75;");
+        hbox.setStyle("-fx-background-color: #001871;");
         
         Button deleteBtn = new Button("Delete Selected");
         deleteBtn.setOnAction(new EventHandler<ActionEvent>() {
@@ -74,25 +71,27 @@ public class SavedDataViewFactory {
                 for(Search search: deletedSearches){
                     searches.remove(search);
                 }
-                searchTable.setItems(dbController.getAllSearches());
             }
         });
         hbox.getChildren().add(deleteBtn);
 
         Button backToSearchBtn = new Button("Search Again");
+        backToSearchBtn.setOnAction(e -> window.setScene(scene2.getNextScene()));
+        
         StackPane stack = new StackPane();
-        stack.getChildren().add(backToSearchBtn);
         stack.setAlignment(Pos.BASELINE_RIGHT);
+        stack.getChildren().add(backToSearchBtn);
         StackPane.setMargin(backToSearchBtn, new Insets(0, 10, 0, 0));
+        
         hbox.getChildren().add(stack);
         HBox.setHgrow(stack, Priority.ALWAYS);
-        backToSearchBtn.setOnAction(e -> window.setScene(scene2.getNextScene()));
         
         return hbox;
     }
    
     private TableView<Search> buildTable(){
         //Create view to display data table;
+        this.searches = dbController.getAllSearches();
         TableColumn<Search, String> termCol = new TableColumn("Search Term");
         termCol.setMinWidth(100);
         termCol.setCellValueFactory(new PropertyValueFactory<>("term"));

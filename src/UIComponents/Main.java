@@ -16,12 +16,12 @@ import javafx.stage.Stage;
  * @author Cam
  */
 public class Main extends Application {
-    Stage window;
-    SearchScene scene1, scene2;   
-    SearchViewFactory viewFactory;
-    SavedDataViewFactory viewFactory2;
-    final APIinterface wikiAPI = new WikipediaService();
-    final DBController dbController = new DBController();
+    private Stage window;
+    private SearchScene scene1, scene2;   
+    private SearchViewFactory viewFactory;
+    private SavedDataViewFactory viewFactory2;
+    private final APIinterface wikiAPI = new WikipediaService();
+    private final DBController dbController = new DBController();
 
     @Override
     public void start(Stage primaryStage) {
