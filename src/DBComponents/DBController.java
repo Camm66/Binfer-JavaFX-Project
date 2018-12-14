@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package DBComponents;
 
 import java.sql.Connection;
@@ -14,41 +9,55 @@ import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.Properties;
-import DataModels.Search;
+import Model.Search;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-/**
- *
- * @author Cam
- */
-public final class DBController implements DBinterface{
-    private final String userName = "cammorales93";
-    private String password = "Crushed66cc?";
-    private String dbUrl = "jdbc:derby://localhost:1527/SearchResults";
+public final class DBController {
+    private final String userName = "xxxxxx";
+    private final String password = "xxxxxx";
+    private final String dbUrl = "jdbc:derby://localhost:1527/SavedSearches";
     
-    private static String INSERT_SQL = "INSERT INTO "
-             + "cammorales93.searches(id, term, response, source) values(?, ?, ?, ?) ";
+    private static final String INSERT_SQL = 
+            "INSERT INTO xxxxxx.searches(id, title, summary, source) "
+          + "values(?, ?, ?, ?) ";
      
-    private static final String DELETE_SQL = "DELETE FROM cammorales93.searches"
-                                              + " WHERE id = ?";
+    private static final String DELETE_SQL = 
+            "DELETE FROM xxxxxx.searches"
+         + " WHERE id = ?";
     
-    private static final String FIND_ALL_SQL = "SELECT * FROM cammorales93.searches";
+    private static final String FIND_ALL_SQL = 
+            "SELECT * "
+          + "FROM xxxxxx.searches";
      
-    private static final String GET_ID_SQL = "SELECT * FROM cammorales93.searches "
-                                             + " ORDER BY id DESC";
+    private static final String GET_ID_SQL = 
+            "SELECT * "
+          + "FROM xxxxxx.searches "
+          + " ORDER BY id DESC";
     
-    public DBController(){}
-    
-    @Override
+    private Connection getConnection() {
+        Connection conn = null;
+        Properties connectionProps = new Properties();
+        connectionProps.put("user", this.userName);
+        connectionProps.put("password", this.password);
+        try {
+            Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+            conn = DriverManager.getConnection(this.dbUrl, connectionProps);
+        } catch (SQLException ex) {
+            System.out.println(ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(DBController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return conn;
+    }
+     
     public void writeToDatabase(Search search){
         try {
             Connection conn = getConnection();
-            PreparedStatement ps = conn.prepareStatement(INSERT_SQL,
-                    Statement.RETURN_GENERATED_KEYS);
-            ps.setLong(1, getLastID(conn));
-            ps.setString(2, search.getTerm());
-            ps.setString(3, search.getResponse());
+            PreparedStatement ps = conn.prepareStatement(INSERT_SQL);
+            ps.setLong(1, getNextID(conn));
+            ps.setString(2, search.getTitle());
+            ps.setString(3, search.getSummary());
             ps.setString(4, search.getSource());
             ps.executeUpdate();
         } catch (SQLException ex) {
@@ -56,12 +65,10 @@ public final class DBController implements DBinterface{
         }
     }
     
-    @Override
     public void deleteFromDatabase(Search search) {
         try {
             Connection conn = getConnection();
-            PreparedStatement ps = conn.prepareStatement(DELETE_SQL,
-                    Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = conn.prepareStatement(DELETE_SQL);
             ps.setLong(1, search.getID());
             ps.executeUpdate();
         } catch (SQLException ex) {
@@ -69,7 +76,6 @@ public final class DBController implements DBinterface{
         }
     }
 
-    @Override
     public ObservableList<Search> getAllSearches() {
         ObservableList<Search> result = FXCollections.observableArrayList();
         Statement stmt = null;
@@ -80,10 +86,10 @@ public final class DBController implements DBinterface{
             rs.next();
             while (rs.next()) {
                 Long id = rs.getLong("id");
-                String term = rs.getString("term");
-                String response = rs.getString("response");
+                String title = rs.getString("title");
+                String summary = rs.getString("summary");
                 String source = rs.getString("source");
-                result.add(new Search(id, term, response, source));
+                result.add(new Search(id, title, summary, source));
             }    
         } catch (SQLException e ) {
             System.out.println(e);
@@ -91,11 +97,10 @@ public final class DBController implements DBinterface{
         return result;
     }
 
-    private long getLastID(Connection conn) {
+    private long getNextID(Connection conn) {
         Long id = null;
-        Statement stmt = null;
         try{
-            stmt = conn.createStatement();
+            Statement stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(GET_ID_SQL);   
             rs.next();
             id = rs.getLong(1);
@@ -103,18 +108,5 @@ public final class DBController implements DBinterface{
             System.out.println(e);
         }
         return id + 1;
-    }
-    
-    private Connection getConnection() {
-        Connection conn = null;
-        Properties connectionProps = new Properties();
-        connectionProps.put("user", this.userName);
-        connectionProps.put("password", this.password);
-        try {
-            conn = DriverManager.getConnection(this.dbUrl, connectionProps);
-        } catch (SQLException ex) {
-            System.out.println(ex);
-        }
-        return conn;
     }
 }

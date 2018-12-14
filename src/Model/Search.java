@@ -1,27 +1,18 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package DataModels;
+package Model;
 
 import javafx.scene.control.CheckBox;
 
-/**
- *
- * @author Cam
- */
 public class Search {
     private Long id;
-    private String term;
-    private String response;
+    private String title;
+    private String summary;
     private String source;
     private CheckBox checkbox;
     
-    public Search(Long id, String term, String response, String source){
+    public Search(Long id, String title, String summary, String source){
         this.id = id;
-        this.term = term;
-        this.response = response;
+        this.title = title;
+        this.summary = summary;
         this.source = source;
         this.checkbox = new CheckBox();
     }
@@ -30,12 +21,12 @@ public class Search {
         return this.id;
     }
     
-    public String getTerm(){
-        return this.term;
+    public String getTitle(){
+        return this.title;
     }
     
-    public String getResponse(){
-        return this.response;
+    public String getSummary(){
+        return this.summary;
     }
     
     public String getSource() {
@@ -52,6 +43,6 @@ public class Search {
     
     @Override
     public String toString(){
-        return this.getTerm();
+        return this.getTitle();
     }
 }
