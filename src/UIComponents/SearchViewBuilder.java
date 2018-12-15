@@ -27,25 +27,22 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
-public class SearchViewFactory {
-    private Stage window;  
+public class SearchViewBuilder {
+    private GUIWindow window;
     private APIinterface apiService;
     private final DBController dbController;
-    private final SavedDataViewFactory viewFactory;
     private ListView<Search> listView;
 
-    public SearchViewFactory(Stage window, APIinterface apiService, DBController dbController) {
-        this.window = window;
+    public SearchViewBuilder(APIinterface apiService, DBController dbController) {
         this.apiService = apiService;
         this.dbController = dbController;
-        this.viewFactory = new SavedDataViewFactory(window, dbController);
     }
      
-    public SearchScene buildScene() {
+    public Scene buildScene() {
         BorderPane rootPane = new BorderPane();
-        SearchScene scene1 =  new SearchScene(rootPane, 700, 450);
+        Scene scene =  new Scene(rootPane, 700, 450);
         
-        HBox hbox = buildMenu(scene1);
+        HBox hbox = buildMenu(scene);
         rootPane.setTop(hbox);
     
         this.listView = new ListView<>();
@@ -53,10 +50,10 @@ public class SearchViewFactory {
         
         HBox anchor = buildAnchor();
         rootPane.setBottom(anchor);
-        return scene1;
+        return scene;
     }
 
-    private HBox buildMenu(SearchScene scene1) {
+    private HBox buildMenu(Scene scene) {
         HBox hbox = new HBox();
         hbox.setPadding(new Insets(15, 12, 15, 12));
         hbox.setSpacing(10);
@@ -69,10 +66,7 @@ public class SearchViewFactory {
 
         Button viewSavedBtn = new Button("View Saved");
         viewSavedBtn.setOnAction(e -> {
-            SearchScene scene2 = this.viewFactory.buildScene();
-            scene2.setNextScene(scene1);
-            window.setTitle("View Saved");
-            window.setScene(scene2);
+            window.setScene("View Saved");
         });
         StackPane stack = new StackPane();
         stack.getChildren().add(viewSavedBtn);
@@ -118,7 +112,7 @@ public class SearchViewFactory {
         
         final Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
-        dialog.initOwner(window);
+        dialog.initOwner(window.getWindow());
         
         VBox dialogVbox = new VBox(20);
         dialogVbox.setPadding(new Insets(10, 10, 10, 10));
@@ -163,5 +157,9 @@ public class SearchViewFactory {
         for(Search search: savedSearches){
             items.remove(search);
         }
+    }
+    
+    public void setWindow(GUIWindow window){
+        this.window = window;
     }
 }
